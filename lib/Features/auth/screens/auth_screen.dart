@@ -127,20 +127,20 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Titre centré
+                      // Titre centré - AGRANDI
                       Center(
                         child: Text(
                           _isLogin ? 'login' : 'create account',
                           style: GoogleFonts.aladin(
-                            fontSize: 42,
+                            fontSize: 60, // Augmenté de 42 à 60
                             fontWeight: FontWeight.w400,
                             color: const Color(0xFFE91E63),
-                            letterSpacing: 0.5,
+                            letterSpacing: 1.0, // Augmenté aussi l'espacement
                             shadows: [
                               Shadow(
-                                offset: const Offset(0, 1),
-                                blurRadius: 2,
-                                color: Colors.black.withOpacity(0.1),
+                                offset: const Offset(0, 2), // Ombre plus visible
+                                blurRadius: 4,
+                                color: Colors.black.withOpacity(0.15),
                               ),
                             ],
                           ),
