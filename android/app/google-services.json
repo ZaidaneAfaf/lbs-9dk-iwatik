@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "498514146362",
+    "project_id": "lbs9dkiawtik",
+    "storage_bucket": "lbs9dkiawtik.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:498514146362:android:331805d81202fd2c88b103",
+        "android_client_info": {
+          "package_name": "com.example.lbs9dkiwatik"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAArZJDRXA56h52H7uPLYyAnpPDILhon8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
