@@ -1,10 +1,17 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 class AppUser {
+  final String? uid;
   final String? email;
-  
-  const AppUser(this.email);
+  final String? role;
 
-  factory AppUser.fromFirebase(User? user) {
-    return AppUser(user?.email);
+  AppUser({this.uid, this.email, this.role});
+
+  factory AppUser.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map;
+    return AppUser(
+      uid: doc.id,
+      email: data['email'],
+      role: data['role'],
+    );
   }
 }

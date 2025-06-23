@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../screens/auth_screen.dart';
 
 class AuthForm extends StatefulWidget {
   final Future<void> Function(String email, String password) onSubmit;
@@ -55,11 +54,15 @@ class _AuthFormState extends State<AuthForm> {
               decoration: const InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.email),
               ),
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Veuillez entrer un email';
+                }
+                if (!value.contains('@')) {
+                  return 'Veuillez entrer un email valide';
                 }
                 return null;
               },
@@ -70,38 +73,38 @@ class _AuthFormState extends State<AuthForm> {
               decoration: const InputDecoration(
                 labelText: 'Mot de passe',
                 border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.lock),
               ),
               obscureText: true,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Veuillez entrer un mot de passe';
                 }
-                if (value.length < 6) {
+                if (!widget.isLogin && value.length < 6) {
                   return 'Le mot de passe doit faire au moins 6 caractères';
                 }
                 return null;
               },
             ),
             const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submit,
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : Text(widget.isLogin ? 'Se connecter' : 'S\'inscrire'),
-            ),
-            if (!widget.isLogin) ...[
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (ctx) => AuthScreen(isLogin: true),
-                    ),
-                  );
-                },
-                child: const Text('Déjà un compte ? Se connecter'),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(
+                        widget.isLogin ? 'Se connecter' : 'S\'inscrire',
+                        style: const TextStyle(fontSize: 18),
+                      ),
               ),
-            ],
+            ),
           ],
         ),
       ),
