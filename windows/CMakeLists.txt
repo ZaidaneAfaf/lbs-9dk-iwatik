@@ -1,6 +1,8 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
 project(lbs9dkiwatik LANGUAGES CXX)
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.

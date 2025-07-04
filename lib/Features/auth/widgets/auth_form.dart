@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../screens/auth_screen.dart';
+import '../screens/role_selection_screen.dart';
 
 class AuthForm extends StatefulWidget {
   final Future<void> Function(String email, String password) onSubmit;
@@ -83,21 +84,33 @@ class _AuthFormState extends State<AuthForm> {
               },
             ),
             const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submit,
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : Text(widget.isLogin ? 'Se connecter' : 'S\'inscrire'),
-            ),
+            widget.isLogin
+                ? ElevatedButton(
+                    onPressed: _isLoading ? null : _submit,
+                    child: _isLoading
+                        ? const CircularProgressIndicator()
+                        : const Text('Se connecter'),
+                  )
+                : ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (ctx) => const RoleSelectionScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('S\'inscrire'),
+                  ),
             if (!widget.isLogin) ...[
               const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (ctx) => AuthScreen(isLogin: true),
-                    ),
-                  );
+  MaterialPageRoute(
+    builder: (ctx) => const RoleSelectionScreen(),
+  ),
+);
+
                 },
                 child: const Text('Déjà un compte ? Se connecter'),
               ),
