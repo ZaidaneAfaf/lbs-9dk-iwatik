@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 
 import '../controllers/auth_controller.dart';
-import 'home_screen.dart';
+import '../../Admin/screens/acceuil_admin.dart';
+import '../../Couturier/screens/acceuil_couturier.dart';
+import '../../Client/screens/acceuil_client.dart';
 import 'role_selection_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -24,8 +26,6 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    // On ne fait plus de redirection automatique ici.
-    // La redirection sera gérée après vérification du statut lors de la connexion.
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
@@ -45,14 +45,13 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _authController.signInWithEmailAndPassword(
+      final role = await _authController.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
       if (!mounted) return;
 
-      // Si on arrive ici, connexion réussie ET compte validé (sinon exception levée)
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Connexion réussie !"),
@@ -60,9 +59,23 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       );
 
+      Widget nextScreen;
+
+      switch (role) {
+        case 'admin':
+          nextScreen = const AdminHomePage();
+          break;
+        case 'couturier':
+          nextScreen = const CouturierHomePage();
+          break;
+        default:
+          nextScreen = const ClientHomePage();
+          break;
+      }
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => nextScreen),
       );
     } catch (e) {
       if (mounted) {
@@ -77,9 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         );
       }
-
-      // Si compte pas validé, on déconnecte au cas où
-      await FirebaseAuth.instance.signOut();
+      
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -100,51 +111,45 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller, String hint, bool isPassword) {
-  return TextFormField(
-    controller: controller,
-    obscureText: isPassword,
-    keyboardType:
-        isPassword ? TextInputType.visiblePassword : TextInputType.emailAddress,
-    style: TextStyle(color: Colors.grey[800]), // texte saisi gris foncé
-    decoration: InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[400]), // hint gris clair
-      filled: false, // PAS de fond coloré
-      // fillColor: Colors.white, // enlever ou commenter cette ligne
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.black), // contour noir
+  Widget _buildTextField(TextEditingController controller, String hint, bool isPassword) {
+    return TextFormField(
+      controller: controller,
+      obscureText: isPassword,
+      keyboardType: isPassword ? TextInputType.visiblePassword : TextInputType.emailAddress,
+      style: TextStyle(color: Colors.grey[800]),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        filled: false,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.black, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.black), // contour noir quand pas focus
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.black, width: 2), // contour noir plus épais au focus
-      ),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    ),
-    validator: (value) {
-      if (value == null || value.isEmpty) {
-        return isPassword
-            ? 'Veuillez entrer un mot de passe'
-            : 'Veuillez entrer un email';
-      }
-      if (!isPassword &&
-          !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-        return 'Email invalide';
-      }
-      if (isPassword && value.length < 6) {
-        return 'Le mot de passe doit faire au moins 6 caractères';
-      }
-      return null;
-    },
-  );
-}
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return isPassword ? 'Veuillez entrer un mot de passe' : 'Veuillez entrer un email';
+        }
+        if (!isPassword &&
+            !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+          return 'Email invalide';
+        }
+        if (isPassword && value.length < 6) {
+          return 'Le mot de passe doit faire au moins 6 caractères';
+        }
+        return null;
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -232,8 +237,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             child: _isLoading
                                 ? const CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                   )
                                 : const Text('Sign In',
                                     style: TextStyle(

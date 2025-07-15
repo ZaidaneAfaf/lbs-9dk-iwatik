@@ -4,14 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AuthController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
-
-  Future<void> signInWithEmailAndPassword({
+  Future<String> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     try {
-      // Étape 1 : Authentification Firebase
       final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password.trim(),
@@ -19,12 +16,18 @@ class AuthController {
 
       final user = userCredential.user;
       if (user == null) {
-        throw 'Erreur : utilisateur introuvable après authentification';
+        throw 'Utilisateur introuvable après authentification';
       }
 
-      // Étape 2 : Vérification spécifique pour les couturiers
       await _verifyCouturierStatus(user.uid);
 
+      if (await isAdmin(user.uid)) {
+        return 'admin';
+      } else if (await isCouturier(user.uid)) {
+        return 'couturier';
+      } else {
+        return 'client';
+      }
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     } catch (e) {
@@ -33,66 +36,24 @@ class AuthController {
   }
 
   Future<void> _verifyCouturierStatus(String userId) async {
-    final couturierDoc = await FirebaseFirestore.instance
-        .collection('couturiers')
-        .doc(userId)
-        .get();
-
-    if (couturierDoc.exists) {
-      final data = couturierDoc.data() as Map<String, dynamic>;
-      final bool isActivated = data['status'] ?? false;
-
+    final doc = await FirebaseFirestore.instance.collection('couturiers').doc(userId).get();
+    if (doc.exists) {
+      final bool isActivated = doc.data()?['status'] ?? false;
       if (!isActivated) {
         await _auth.signOut();
-        throw 'Votre compte couturier est en attente de validation par l\'administrateur.';
+        throw 'Votre compte couturier est en attente de validation par l’administrateur.';
       }
     }
   }
 
-  Future<void> signUpWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      await _auth.createUserWithEmailAndPassword(
-        email: email.trim(),
-        password: password.trim(),
-      );
-    } on FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    }
-  }
-
-  Future<void> signOut() async {
-    await _auth.signOut();
-  }
-
-  Future<User?> getCurrentUser() async {
-    return _auth.currentUser;
-  }
-
-  Future<bool> isCouturier(String userId) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('couturiers')
-        .doc(userId)
-        .get();
+  Future<bool> isAdmin(String userId) async {
+    final doc = await FirebaseFirestore.instance.collection('admins').doc(userId).get();
     return doc.exists;
   }
 
-  Future<bool> isCouturierActivated(String userId) async {
-    try {
-      final doc = await FirebaseFirestore.instance
-          .collection('couturiers')
-          .doc(userId)
-          .get();
-
-      if (doc.exists) {
-        return doc.get('status') ?? false;
-      }
-      return false;
-    } catch (e) {
-      return false;
-    }
+  Future<bool> isCouturier(String userId) async {
+    final doc = await FirebaseFirestore.instance.collection('couturiers').doc(userId).get();
+    return doc.exists;
   }
 
   String _handleAuthException(FirebaseAuthException e) {
