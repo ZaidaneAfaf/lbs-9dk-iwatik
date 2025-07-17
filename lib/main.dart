@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+
 import 'features/auth/screens/auth_screen.dart';
-import 'firebase_options.dart'; // Ce fichier sera généré par flutterfire configure
+import 'features/Couturier/controllers/model_controller.dart'; // <-- ajoute ce bon import
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    runApp(const MyApp());
+
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ModelController()),
+        ],
+        child: const MyApp(),
+      ),
+    );
   } catch (e) {
     runApp(
       MaterialApp(

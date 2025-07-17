@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../screens/auth_screen.dart';
 import '../screens/role_selection_screen.dart';
 
 class AuthForm extends StatefulWidget {
